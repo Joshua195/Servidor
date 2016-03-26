@@ -6,7 +6,6 @@ import java.util.Random;
 
 public class Pelota implements Serializable{
 
-    private static Color[] colors = new Color[]{Color.BLACK,Color.BLUE,Color.DARK_GRAY,Color.RED,Color.GREEN};
     private Float x;
     private Float y;
     private Float vx;
@@ -15,24 +14,13 @@ public class Pelota implements Serializable{
     private Integer puerto;
 
     public Pelota(Integer puerto) {
-        x = 10f;
-        y = 20f;
+        x = (float) new Random().nextInt(Ctes.ANCHO);
+        y = (float) new Random().nextInt(Ctes.ALTO);
         vx = 50f;
         vy = 50f;
-        //color = colors[new Random().nextInt(colors.length)];
         color = new Color(new Random().nextInt(255),new Random().nextInt(255),new Random().nextInt(255));
         this.puerto = puerto;
     }
-    
-    public Pelota(Float x, Float y, Integer puerto) {
-        this.x = x;
-        this.y = y;
-        vx = 50f;
-        vy = 50f;
-        color = Color.BLACK;
-        this.puerto = puerto;
-    }
-    
     
     public void fisica(float dt) {
         x += vx * dt;
@@ -51,11 +39,7 @@ public class Pelota implements Serializable{
             return false;
         }
         Pelota pelota = (Pelota)object;
-
-        if(getPuerto().equals(pelota.getPuerto())){
-            return true;
-        }
-        return false;
+        return getPuerto().equals(pelota.getPuerto());
     }
 
     @Override
@@ -79,35 +63,11 @@ public class Pelota implements Serializable{
         this.y = y;
     }
 
-    public Float getVx() {
-        return vx;
-    }
-
-    public void setVx(Float vx) {
-        this.vx = vx;
-    }
-
-    public Float getVy() {
-        return vy;
-    }
-
-    public void setVy(Float vy) {
-        this.vy = vy;
-    }
-
     public Color getColor() {
         return color;
     }
 
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
     public Integer getPuerto() {
         return puerto;
-    }
-
-    public void setPuerto(Integer puerto) {
-        this.puerto = puerto;
     }
 }

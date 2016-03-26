@@ -21,71 +21,73 @@ public class HiloServer extends Thread{
     }
 
     public void run(){
-        System.out.println("Ha llegado una peticion \n");
-        System.out.println("Procedente de: " + datagramPacket.getAddress());
-        System.out.println("En el puerto: " + datagramPacket.getPort());
-        Pelota pelotaUser = bytesParceObj(datagramPacket.getData());
-        System.out.println("[" + pelotaUser.getX() + "],[" + pelotaUser.getY() + "],[" + pelotaUser.getPuerto() + "]");
-
-        Pelota pelotaExistente = pelotasGlobales.get(pelotaUser.getPuerto());
-        if(pelotaExistente==null){
-            pelotasGlobales.put(pelotaUser.getPuerto(), pelotaUser);
-        }else{
-            pelotaExistente.setX(pelotaUser.getX());
-            pelotaExistente.setY(pelotaUser.getY());
-        }
-
-        ArrayList<Pelota> pelotasEnviar = new ArrayList<Pelota>(pelotasGlobales.values());
-        for(Pelota remover : pelotasEnviar){
-            if(remover.equals(pelotaUser)){
-                pelotasEnviar.remove(remover);
-                break;
-            }
-        }
-
-
-        System.out.println(pelotasEnviar.size());
-        //Pelota pelota1 = new Pelota(pelota.getX()+100, pelota.getY()+100,5559);
-        //pelotasEnviar.add(pelota1);
-        /*for (int i = 0; i < pelotasEnviar.size(); i++){
-            System.out.println("[" + pelotasEnviar.get(i).getX() + "],[" + pelotasEnviar.get(i).getY() + "],[" + pelotasEnviar.get(i).getPuerto() + "]");
-        }*/
-        byte datosEnviar[] = arrayParceBytes(pelotasEnviar);
+        System.out.println("Ha llegado una peticion");
+        Pelota pelotaUser = (Pelota) bytesParceObj(datagramPacket.getData());
+        pelotaNueva(pelotaUser);
+        byte datosEnviar[] = datosEnviar(pelotaUser);
         DatagramPacket packet = new DatagramPacket(datosEnviar, datosEnviar.length, datagramPacket.getAddress(),datagramPacket.getPort());
         try {
             datagramSocket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Peticion Servida");
     }
 
-    public Pelota bytesParceObj(byte[] bytes){
-        Pelota pelota = null;
+    public Object bytesParceObj(byte[] bytes){
+        Object object = null;
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-            ObjectInputStream objectInputStream = null;
+            ObjectInputStream objectInputStream;
             objectInputStream = new ObjectInputStream(byteArrayInputStream);
-            pelota = (Pelota) objectInputStream.readObject();
+            object = objectInputStream.readObject();
             objectInputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        return pelota;
+        return object;
     }
 
-    public byte[] arrayParceBytes(ArrayList<Pelota> arrayList){
+    public byte[] objParceBytes(Object object){
         byte[] bytes = null;
         try {
             ByteArrayOutputStream byteArrayOutputStream= new ByteArrayOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(arrayList);
+            objectOutputStream.writeObject(object);
             objectOutputStream.close();
             bytes =  byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return bytes;
+    }
+
+    public void pelotaNueva(Pelota pelota){
+        Pelota pelotaExistente = pelotasGlobales.get(pelota.getPuerto());
+
+        if(pelotaExistente == null){
+            pelotasGlobales.put(pelota.getPuerto(), pelota);
+        }else{
+            pelotaExistente.setX(pelota.getX());
+            pelotaExistente.setY(pelota.getY());
+        }
+    }
+
+    public byte[] datosEnviar(Pelota pelota){
+        ArrayList<Pelota> pelotasEnviar = new ArrayList<>(pelotasGlobales.values());
+        for (int i = 0; i > pelotasEnviar.size(); i++){
+            if (pelotasEnviar.get(i).equals(pelota)){
+                pelotasEnviar.remove(pelotasEnviar.get(i));
+                break;
+            }
+        }
+
+        return objParceBytes(pelotasEnviar);
+        /*for(Pelota remover : pelotasEnviar){
+            if(remover.equals(pelotaUser)){
+                pelotasEnviar.remove(remover);
+                break;
+            }
+        }*/
     }
 }
