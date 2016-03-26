@@ -1,4 +1,4 @@
-package cliente1;
+package cliente;
 
 import constantes.Constantes;
 import pelota.Ctes;
